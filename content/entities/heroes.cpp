@@ -1,7 +1,9 @@
 #include "heroes.h"
 #include "action.h"
 #include "engine.h"
+
 #include "rest.h"
+#include "move.h"
 
 namespace Heroes {
     void make_wizard(std::shared_ptr<Entity>& hero) {
@@ -15,6 +17,14 @@ namespace Heroes {
 
         if (key == "R") {
             return std::make_unique<Rest>();
+        } else if (key == "W") { // fwd
+            return std::make_unique<Move>(Vec {0, 1});
+        } else if (key == "A") { // left
+            return std::make_unique<Move>(Vec {-1, 0});
+        } else if (key == "S") { // back
+            return std::make_unique<Move>(Vec {0, -1});
+        } else if (key == "D") { // right
+            return std::make_unique<Move>(Vec {1, 0});
         }
 
         return nullptr;
