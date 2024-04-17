@@ -2,17 +2,24 @@
 #include "tile.h"
 #include "engine.h"
 #include "move.h"
+#include "opendoor.h"
+
+#include <iostream>
 
 Move::Move(Vec direction):direction {direction} {}
 
 Result Move::perform(Engine& engine, std::shared_ptr<Entity> entity) {
     entity->change_direction(direction);
-    Vec goto_dir = entity->get_position() + direction;
+    Vec new_pos = entity->get_position() + direction;
+    Tile& tile = engine.dungeon.get_tile(new_pos);
 
-    if (engine.dungeon.get_tile(goto_dir).walkable) {
-        entity->move_to(goto_dir);
-        return success();
-    }
+    if (tile.is_wall() || tile.has_entity())
+        return failure();
 
-    return failure();
+    if (tile.has_door() && !tile.door->is_open())
+        return alternative(OpenDoor{*tile.door});
+
+
+    entity->move_to(new_pos);
+    return success();
 }
