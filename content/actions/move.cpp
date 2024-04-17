@@ -4,8 +4,6 @@
 #include "move.h"
 #include "opendoor.h"
 
-#include <iostream>
-
 Move::Move(Vec direction):direction {direction} {}
 
 Result Move::perform(Engine& engine, std::shared_ptr<Entity> entity) {
