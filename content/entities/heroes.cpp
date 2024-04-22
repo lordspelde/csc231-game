@@ -16,7 +16,7 @@ namespace Heroes {
         hero->behavior = behavior;
     }
 
-    std::unique_ptr<Action> behavior(Engine& engine, Entity&) {
+    std::unique_ptr<Action> behavior(Engine& engine, Entity& entity) {
         std::string key = engine.input.get_last_keypress();
 
         if (key == "R") {
@@ -31,6 +31,9 @@ namespace Heroes {
             return std::make_unique<Move>(Vec {0, -1});
         } else if (key == "D") { // right
             return std::make_unique<Move>(Vec {1, 0});
+        } else if (!key.empty() && std::isdigit(key.at(0))){
+            int item_num = std::stoi(key) - 1; // "1" -> index 0
+            entity.select_item(item_num);
         }
 
         return nullptr;
