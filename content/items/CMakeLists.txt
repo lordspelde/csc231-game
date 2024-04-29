@@ -1,6 +1,7 @@
 add_library(items
   bite.cpp
         sword.cpp
+        spear.cpp
 )
 
 target_include_directories(items PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
