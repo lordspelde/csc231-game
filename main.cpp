@@ -2,6 +2,7 @@
 #include "heroes.h"
 #include "monsters.h"
 #include <iostream>
+#include "entity.h"
 
 int main() {
     try {
@@ -11,9 +12,20 @@ int main() {
         std::shared_ptr<Entity> hero = engine.create_hero();
         Heroes::make_wizard(hero);
 
-        for (int i = 0; i < 20; i++) {
-            std::shared_ptr<Entity> monster = engine.create_monster();
-            Monsters::make_monster(monster);
+        for (int i = 0; i < 8; i++) {
+            std::shared_ptr<Entity> skeleton = engine.create_monster();
+            Monsters::make_skeleton(skeleton);
+
+        }
+
+        for (int i = 0; i < 8; i++) {
+            std::shared_ptr<Entity> zombie = engine.create_monster();
+            Monsters::make_zombie(zombie);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            std::shared_ptr<Entity> golem = engine.create_monster();
+            Monsters::make_golem(golem);
         }
 
         engine.run();
