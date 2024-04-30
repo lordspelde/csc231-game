@@ -1,4 +1,7 @@
 #include "fog.h"
+
+#include <algorithm>
+
 #include "dungeon.h"
 #include "fov.h"
 
