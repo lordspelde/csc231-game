@@ -9,10 +9,19 @@ Fog::Fog(double brightness_seen)
     :brightness_seen{brightness_seen}, position{} {}
 
 void Fog::update_visibility(Dungeon& dungeon, const Vec& new_position) {
-    position = new_position;
     for (const Vec& pos : visible_tiles) {
         dungeon.tiles(pos).visible = false;
     }
+
+    update_visibility_no_update(dungeon, new_position);
+
+    for (const Vec& pos : visible_tiles) {
+        dungeon.tiles(pos).visible = true;
+    }
+}
+
+void Fog::update_visibility_no_update(const Dungeon& dungeon, const Vec& new_position) {
+    position = new_position;
 
     previously_seen_tiles.insert(std::begin(visible_tiles), std::end(visible_tiles));
 
@@ -20,10 +29,8 @@ void Fog::update_visibility(Dungeon& dungeon, const Vec& new_position) {
     visible_tiles = fov.compute(new_position, [&](const Vec& pos) {
         return dungeon.is_opaque(pos);
     });
-    for (const Vec& pos : visible_tiles) {
-        dungeon.tiles(pos).visible = true;
-    }
 }
+
 
 double Fog::brightness(const Vec& location) const {
     if (visible_tiles.count(location)) {
@@ -37,4 +44,16 @@ double Fog::brightness(const Vec& location) const {
     else {
         return 1;
     }
+}
+
+bool Fog::is_visible(const Vec& location) const {
+    return visible_tiles.count(location);
+}
+
+bool Fog::is_seen(const Vec& location) const {
+    return previously_seen_tiles.count(location);
+}
+
+Vec Fog::get_position() const {
+    return position;
 }

@@ -1,5 +1,8 @@
 #include "camera.h"
 
+#include <algorithm>
+#include <iostream>
+
 #include "dungeon.h"
 #include "entities.h"
 #include "entity.h"
@@ -70,13 +73,63 @@ void Camera::render_fog(const Dungeon& dungeon) const {
     int y_min = std::max(0, min.y);
     int x_max = std::min(max.x, dungeon.tiles.width-1);
     int y_max = std::min(max.y, dungeon.tiles.height-1);
-        
+
+    // Get torches
+    std::vector<Vec> torches = {};
+
+    for (const auto& torch_entry : dungeon.decorations) {
+        torches.push_back(torch_entry.first);
+    }
+
+    // Insert the character, accounting for the offset applied in the loops
+    torches.push_back(dungeon.fog.get_position() + Vec {0, 1});
+
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            Vec position{x, y};
-            double brightness = dungeon.fog.brightness(position);
-            int alpha = std::clamp(static_cast<int>(brightness*255), 0, 255);
-            render_rect(position, 0, 0, 0, alpha);
+            Vec tile_position {x, y};
+
+            // Make sure the tile is visible before running calculation
+            if (within_view(tile_position) && dungeon.fog.is_visible(tile_position)) {
+                // Tile is within current view range
+                double brightness = 1;  // dungeon.fog.brightness(tile_position);
+                bool torch_in_range = false;
+
+                for (Vec pos : torches) {
+                    pos = pos - Vec {0, 1};
+
+                    double dist = distance(tile_position, pos);
+
+                    // Torch is in range
+                    if (dist < 10) {
+                        torch_in_range = true;
+
+                        // Temporary fog for checking line of sight from torch to tile_position
+                        Fog temp_fog {};
+                        temp_fog.update_visibility_no_update(dungeon, pos);
+
+                        if (temp_fog.is_visible(tile_position)) {
+                            brightness -= 1 / dist;
+                        }
+                    }
+                }
+
+                // If no torch is nearby, tile should be dark
+                if (!torch_in_range) {
+                    brightness = 1;
+                }
+
+                //brightness = 1 - brightness; // Invert the brightness
+                brightness = std::clamp(brightness, 0.0, 0.9); // Clamp brightness to desired range
+
+                // Draw fog
+                render_rect(tile_position, 0, 0, 0, 255 * brightness);
+            } else if (dungeon.fog.is_seen(tile_position)) {
+                // Tile has been previously seen
+                render_rect(tile_position, 0, 0, 0, 255 * 0.9);
+            } else {
+                // Tile has never been seen
+                render_rect(tile_position, 0, 0, 0, 255);
+            }
         }
     }
 }
